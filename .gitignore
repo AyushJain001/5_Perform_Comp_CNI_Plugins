@@ -1,0 +1,8 @@
+.venv/
+.vscode/
+G_5_artifacts/
+__pycache__/
+*.aux
+*.log
+*.out
+*.toc

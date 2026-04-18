@@ -1,0 +1,297 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{setspace}
+
+% Remove colored links and visible link boxes in PDF output.
+\hypersetup{
+    colorlinks=false,
+    pdfborder={0 0 0},
+    hidelinks
+}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\onehalfspacing
+
+\title{\textbf{CSE638 GRS 2026}\\[0.6em]
+\textbf{Performance Comparison of Kubernetes CNI Plugins}\\
+\large Flannel vs Calico vs Cilium\\[0.6em]
+\normalsize Group Number: 5\\
+Ayush Jain - MT25066\\Singh Tharun - MT25087\\Ruchir Jain - MT25080}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Executive Summary}
+This report presents a structured and reproducible comparison of Flannel, Calico, and Cilium for Kubernetes microservice networking. Across repeated load experiments, all three CNIs show strong latency performance with clear differences in resource overhead profiles. The evaluation highlights practical deployment trade-offs and provides data-backed guidance for selecting the right CNI based on operational goals such as low overhead, policy flexibility, or advanced eBPF observability.
+
+\textbf{Key highlights:}
+\begin{itemize}[leftmargin=1.5em]
+    \item Stable latency percentile behavior across repeated runs.
+    \item Near-target request handling across tested load points.
+    \item Clear resource overhead separation, enabling informed platform choices.
+\end{itemize}
+
+\section{Problem Statement}
+Container Network Interface (CNI) plugins in Kubernetes provide pod networking, service connectivity, and policy enforcement using different datapath and control-plane strategies. These design differences affect end-to-end latency, tail behavior, and cluster resource overhead in microservice workloads.
+
+This project benchmarks three widely used CNIs, Flannel, Calico, and Cilium, under controlled load. The goal is to quantify practical trade-offs and explain observed behavior through architecture.
+
+\section{Motivation}
+Choosing a CNI is a production-critical systems decision. Networking overhead has direct impact on user-facing latency, compute cost, and SLO compliance. A reproducible comparison is necessary because assumptions like ``eBPF is always fastest'' or ``overlay is always slow'' often depend on workload and deployment context.
+
+\section{Objectives}
+\begin{itemize}[leftmargin=1.5em]
+    \item Build a reproducible benchmark setup that changes only the CNI while keeping workload and cluster baseline consistent.
+    \item Measure latency percentiles (p50/p90/p99), and analyze run-to-run variability.
+    \item Measure CPU and memory overhead from cluster pods under comparable operating conditions.
+    \item Explain performance differences using plugin architecture and datapath behavior.
+    \item Present a submission-ready report with transparent supporting samples from CSV outputs.
+\end{itemize}
+
+\section{Background}
+\subsection{Kubernetes Pod Networking and CNI}
+Kubernetes delegates pod networking setup to CNI plugins. Each plugin configures interfaces, routing, and policy mechanisms in a different way. Under load, differences in encapsulation, packet path length, policy execution, and control-plane interactions can affect both latency and resource usage.
+
+\subsection{Flannel}
+Flannel is a lightweight CNI widely used for simple cluster networking. It commonly relies on overlay encapsulation (VXLAN). Its operational simplicity often yields low control-plane complexity, but packet encapsulation can add overhead under some traffic profiles.
+
+\subsection{Calico}
+Calico emphasizes network policy and scalable routing. Depending on deployment mode, it may use iptables and/or eBPF datapath elements. In many practical setups, Calico provides a balanced trade-off between capability and overhead.
+
+\subsection{Cilium}
+Cilium is eBPF-native and designed for high-performance datapath processing and deep observability. Its richer feature surface can be beneficial for policy and visibility, while potentially consuming more CPU/memory in constrained environments.
+
+\section{Methodology and Experimental Design}
+\subsection{System Components}
+\begin{itemize}[leftmargin=1.5em]
+    \item Provisioning layer: kind clusters with fixed baseline setup.
+    \item CNI layer: one plugin per run (Flannel, Calico, Cilium).
+    \item Workload layer: HTTP echo service and Fortio-based load client.
+    \item Measurement layer: Fortio outputs transformed to CSV, plus resource snapshots.
+    \item Analysis layer: hardcoded plotting scripts for final reproducible figures.
+\end{itemize}
+
+\subsection{Controlled Setup}
+To ensure fair comparison, the benchmark controls machine, cluster baseline, workload model, and collection process. The only intentional variable is the selected CNI.
+
+\subsection{Benchmark Profile}
+Experiments were executed as repeated QPS sweeps, with detailed analysis focused on the core service operating range (100, 300, and 500 QPS), where comparative behavior is most relevant for typical deployment SLO planning.
+
+\subsection{Collected Metrics}
+\begin{itemize}[leftmargin=1.5em]
+    \item Latency: p50, p90, p99, average latency.
+    \item Throughput and error rate to validate service stability under load.
+    \item Resource overhead: CPU (mcores) and memory (MiB) from pod-level snapshots.
+\end{itemize}
+
+\section{Implementation Details}
+\subsection{Automation and Tooling}
+The project includes shell scripts for setup, cluster creation, deployment, benchmark execution, and metrics collection. Python scripts generate report plots using hardcoded values extracted from measured CSVs, aligned with submission requirements.
+
+\subsection{Installation Requirements and Setup Steps}
+\textbf{Prerequisites}
+\begin{itemize}[leftmargin=1.5em]
+    \item Linux system with Docker running.
+    \item Python 3 environment for plotting and analysis scripts.
+    \item Kubernetes tooling: kind, kubectl, helm, and CNI-specific CLI support.
+\end{itemize}
+
+\textbf{Setup flow}
+\begin{enumerate}[leftmargin=1.8em]
+    \item Install prerequisites and verify Docker availability.
+    \item Create one cluster per CNI plugin.
+    \item Deploy benchmark workload manifests.
+    \item Execute load runs and collect JSON/CSV artifacts.
+    \item Collect resource snapshots and aggregate overhead values.
+    \item Generate final report figures from hardcoded plot scripts.
+\end{enumerate}
+
+\section{Results and Observations}
+\subsection{Experiment E1: p99 Latency vs QPS}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth]{G_5_plots/G_5_p99_latency.png}
+    \caption{p99 latency comparison across CNIs for QPS 100, 300, and 500.}
+\end{figure}
+
+\textbf{Observation:}
+All three CNIs remain in a close latency band. Cilium is slightly higher around 300 QPS in this dataset, while Flannel and Calico track each other closely for most points.
+
+\subsection{Experiment E2: Latency Variability Across Repeated Runs}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth]{G_5_plots/G_5_latency_variability.png}
+    \caption{Mean p99 latency with min-max spread across repeated runs.}
+\end{figure}
+
+\textbf{Observation:}
+Run-to-run variance is present but bounded, which supports reliability of comparative trends. Variability analysis is useful because tail metrics can be sensitive to transient scheduling and queueing effects.
+
+\subsection{Experiment E3: CPU and Memory Overhead}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.86\textwidth]{G_5_plots/G_5_resource_overhead.png}
+    \caption{Aggregate CPU and memory overhead comparison.}
+\end{figure}
+
+\textbf{Observation:}
+Flannel is the lightest in aggregate overhead, Calico is intermediate, and Cilium is highest in this measured setup.
+
+\subsection{Throughput Consistency (Data-Supported)}
+Observed throughput remains very close to offered QPS across runs for all three CNIs, indicating that the stack remains stable in the tested operating range while preserving low error behavior. This supports the latency observations and confirms that comparisons are made under healthy traffic delivery conditions.
+
+\subsection{Why p99 is a Primary Metric}
+\begin{itemize}[leftmargin=1.5em]
+    \item Mean latency can hide tail outliers and understate user-visible worst-case behavior.
+    \item p50 represents typical performance, but not reliability under tail risk.
+    \item p90 helps but still misses late-tail events.
+    \item p99 captures high-percentile slowdown that directly influences SLO violations.
+\end{itemize}
+
+Hence, p99 is emphasized to reflect production-facing reliability, while p50/p90/avg are still retained for context.
+
+\subsection{Top-5 Latency CSV Rows (Transparency Samples)}
+\begin{table}[H]
+\centering
+\small
+\caption{Top 5 rows from Flannel latency CSV (QPS 100).}
+\begin{tabular}{cccccc}
+\toprule
+Run & p50 & p90 & p99 & avg & throughput \\
+\midrule
+1 & 0.00054596 & 0.00092766 & 0.00159493 & 0.00059488 & 99.9946 \\
+2 & 0.00056824 & 0.00094095 & 0.00174056 & 0.00062646 & 99.9945 \\
+3 & 0.00052654 & 0.00092067 & 0.00128243 & 0.00057646 & 99.9954 \\
+4 & 0.00055438 & 0.00093574 & 0.00158489 & 0.00059925 & 99.9948 \\
+5 & 0.00056222 & 0.00093156 & 0.00149200 & 0.00059302 & 99.9937 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Top 5 rows from Calico latency CSV (QPS 100).}
+\begin{tabular}{cccccc}
+\toprule
+Run & p50 & p90 & p99 & avg & throughput \\
+\midrule
+1 & 0.00055235 & 0.00094075 & 0.00174991 & 0.00060487 & 99.9935 \\
+2 & 0.00055305 & 0.00094226 & 0.00136714 & 0.00059748 & 99.9923 \\
+3 & 0.00055499 & 0.00094422 & 0.00177175 & 0.00061223 & 99.9945 \\
+4 & 0.00055118 & 0.00092480 & 0.00120133 & 0.00055425 & 99.9953 \\
+5 & 0.00055501 & 0.00092518 & 0.00130327 & 0.00056306 & 99.9933 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Top 5 rows from Cilium latency CSV (QPS 100).}
+\begin{tabular}{cccccc}
+\toprule
+Run & p50 & p90 & p99 & avg & throughput \\
+\midrule
+1 & 0.00055781 & 0.00094486 & 0.00179226 & 0.00066001 & 99.9953 \\
+2 & 0.00057691 & 0.00096374 & 0.00186320 & 0.00068801 & 99.9927 \\
+3 & 0.00056278 & 0.00095677 & 0.00145410 & 0.00067041 & 99.9944 \\
+4 & 0.00057342 & 0.00094929 & 0.00143620 & 0.00064682 & 99.9956 \\
+5 & 0.00055447 & 0.00095056 & 0.00156517 & 0.00064484 & 99.9932 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Top-5 CPU/Memory CSV Rows (Transparency Samples)}
+\begin{table}[H]
+\centering
+\small
+\caption{Top 5 rows from Flannel resource CSV.}
+\begin{tabular}{llll}
+\toprule
+Namespace & Pod & CPU (mcores) & Memory (MiB) \\
+\midrule
+g5-bench & g5-client-d57c4d46-6q6rl & 1 & 5 \\
+g5-bench & g5-echo-649fbccd57-7t4wj & 0 & 10 \\
+g5-bench & g5-echo-649fbccd57-d7dmb & 0 & 10 \\
+g5-bench & g5-echo-649fbccd57-dj2fn & 0 & 10 \\
+kube-flannel & kube-flannel-ds-nfcnd & 9 & 14 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Top 5 rows from Calico resource CSV.}
+\begin{tabular}{llll}
+\toprule
+Namespace & Pod & CPU (mcores) & Memory (MiB) \\
+\midrule
+g5-bench & g5-client-d57c4d46-n6j2q & 0 & 4 \\
+g5-bench & g5-echo-649fbccd57-ck6rc & 0 & 11 \\
+g5-bench & g5-echo-649fbccd57-pztgs & 0 & 10 \\
+g5-bench & g5-echo-649fbccd57-xxsnk & 0 & 10 \\
+kube-system & calico-kube-controllers-5b4bd99c9c-ln7j6 & 4 & 13 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\caption{Top 5 rows from Cilium resource CSV.}
+\begin{tabular}{llll}
+\toprule
+Namespace & Pod & CPU (mcores) & Memory (MiB) \\
+\midrule
+g5-bench & g5-client-d57c4d46-9kwz7 & 1 & 4 \\
+g5-bench & g5-echo-649fbccd57-42f7m & 0 & 8 \\
+g5-bench & g5-echo-649fbccd57-8jvjg & 0 & 9 \\
+g5-bench & g5-echo-649fbccd57-qrlc5 & 0 & 8 \\
+kube-system & cilium-envoy-7j8pv & 11 & 23 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Discussion}
+\subsection{Architectural Interpretation}
+Flannel's simpler model aligns with low overhead in this setup. Calico provides a practical balance of policy and performance. Cilium's higher measured overhead is consistent with richer datapath functionality and observability capabilities.
+
+\subsection{Reliability and Validity}
+Repeated runs improve confidence, but results still depend on machine load, kernel behavior, and specific software versions. Therefore, values should be interpreted as reproducible for this environment, not universally constant across all deployments.
+
+\section{Conclusion}
+This benchmark shows that Flannel, Calico, and Cilium each deliver strong networking performance for Kubernetes microservices, with stable percentile behavior and high throughput consistency in the evaluated operating range. The most visible differentiation is in resource overhead: Flannel is highly efficient, Calico offers balanced capability, and Cilium provides advanced datapath features with higher resource demand. Overall, the results provide clear, actionable guidance for CNI selection based on deployment priorities.
+
+\section{Future Work}
+\begin{itemize}[leftmargin=1.5em]
+    \item Extend to multi-node and cross-zone experiments.
+    \item Add policy-heavy and bursty traffic scenarios.
+    \item Include packet-loss and recovery behavior analysis.
+\end{itemize}
+
+\section{References}
+\begin{enumerate}[leftmargin=1.8em]
+    \item Kubernetes Documentation: \url{https://kubernetes.io/docs/}
+    \item CNI Specification: \url{https://github.com/containernetworking/cni}
+    \item Flannel Documentation: \url{https://github.com/flannel-io/flannel}
+    \item Calico Documentation: \url{https://docs.tigera.io/calico/latest}
+    \item Cilium Documentation: \url{https://docs.cilium.io/}
+    \item Fortio: \url{https://github.com/fortio/fortio}
+\end{enumerate}
+
+\end{document}
