@@ -1,6 +1,6 @@
-# G_5 Performance Comparison of Kubernetes CNI Plugins
+## G_5 Performance Comparison of Kubernetes CNI Plugins
 
-## 1. Project Overview
+## Project Overview
 
 This repository contains the complete implementation of Group 5's Kubernetes networking performance study.
 
@@ -16,14 +16,14 @@ The comparison is performed under a controlled microservice workload and focuses
 2. Throughput consistency
 3. CPU and memory overhead
 
-## 2. Team Information
+## Team Information
 
-                             Group Number: 5
-                                            Ayush Jain - MT25066
-                                            Singh Tharun - MT25087
-                                            Ruchir Jain - MT25080 
+                                            ##Group Number: 5
+                                            ##Ayush Jain - MT25066
+                                            ##Singh Tharun - MT25087
+                                            ##Ruchir Jain - MT25080 
 
-## 3. Repository Structure
+## Repository Structure
 
 Key folders used in final submission:
 
@@ -33,7 +33,7 @@ Key folders used in final submission:
 4. `G_5_plots/`:  matplotlib scripts and generated plot images
 5. `G_5_report/`: Final report files
 
-## 4. Prerequisites
+## Prerequisites
 
 Run on Linux with the following available:
 
@@ -43,7 +43,7 @@ Run on Linux with the following available:
 
 The setup script handles most tool bootstrapping used by this project.
 
-## 5. Setup Commands
+## Setup Commands
 
 From repository root:
 
@@ -57,11 +57,11 @@ What this does:
 1. Prepares required tooling environment
 2. Sets up local artifacts used by project scripts
 
-## 6. End-to-End Benchmark Workflow
+## End-to-End Benchmark Workflow
 
 Run these steps for each CNI: `flannel`, `calico`, `cilium`.
 
-### 6.1 Create Cluster
+### Create Cluster
 
 ```bash
 ./G_5_scripts/G_5_create_cluster.sh flannel
@@ -69,7 +69,7 @@ Run these steps for each CNI: `flannel`, `calico`, `cilium`.
 ./G_5_scripts/G_5_create_cluster.sh cilium
 ```
 
-### 6.2 Deploy Workload
+### Deploy Workload
 
 ```bash
 ./G_5_scripts/G_5_deploy_workload.sh flannel
@@ -77,7 +77,7 @@ Run these steps for each CNI: `flannel`, `calico`, `cilium`.
 ./G_5_scripts/G_5_deploy_workload.sh cilium
 ```
 
-### 6.3 Run Benchmark
+### Run Benchmark
 
 ```bash
 ./G_5_scripts/G_5_run_benchmark.sh flannel
@@ -85,7 +85,7 @@ Run these steps for each CNI: `flannel`, `calico`, `cilium`.
 ./G_5_scripts/G_5_run_benchmark.sh cilium
 ```
 
-### 6.4 Collect Resource Metrics
+### Collect Resource Metrics
 
 ```bash
 ./G_5_scripts/G_5_collect_metrics.sh flannel
@@ -93,13 +93,13 @@ Run these steps for each CNI: `flannel`, `calico`, `cilium`.
 ./G_5_scripts/G_5_collect_metrics.sh cilium
 ```
 
-### 6.5 Cleanup (Optional)
+### Cleanup (Optional)
 
 ```bash
 ./G_5_scripts/G_5_cleanup.sh
 ```
 
-## 7. Plot Generation Commands
+##  Plot Generation Commands
 
 Use project Python environment if required by your machine setup.
 
@@ -112,9 +112,9 @@ Use project Python environment if required by your machine setup.
 
 Generated figures are written to `G_5_plots/`.
 
-## 8. Expected Output Files
+## Expected Output Files
 
-### 8.1 Final Results (CSV)
+### Final Results (CSV)
 
 1. `G_5_results/G_5_latency_flannel.csv`
 2. `G_5_results/G_5_latency_calico.csv`
@@ -123,11 +123,11 @@ Generated figures are written to `G_5_plots/`.
 5. `G_5_results/G_5_resource_calico.csv`
 6. `G_5_results/G_5_resource_cilium.csv`
 
-### 8.2 Final Report
+### Final Report
 
 1. `G_5_report/G_5_report.pdf`
 
-## 9. Reproducibility Notes
+## Reproducibility Notes
 
 For fair CNI comparison:
 
@@ -136,7 +136,7 @@ For fair CNI comparison:
 3. Run repeated measurements per load point
 4. Compare results only after all three CNIs complete full run cycle
 
-## 10. Troubleshooting
+## Troubleshooting
 
 1. If `kubectl top` fails, ensure metrics-server is available before running resource collection.
 2. If any script is not executable, run:
@@ -153,7 +153,7 @@ chmod +x G_5_scripts/*.sh
 
 
 
-## 11. Quick Run Checklist
+## Quick Run Checklist
 
 Use this short sequence if starting fresh:
 
