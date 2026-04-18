@@ -18,10 +18,10 @@ The comparison is performed under a controlled microservice workload and focuses
 
 ## Team Information
 
-  Group Number: 5
-                                            # Ayush Jain - MT25066
-                                            # Singh Tharun - MT25087
-                                            # Ruchir Jain - MT25080 
+                                           ##  Group Number: 5
+                                          ## Ayush Jain - MT25066
+                                          ## Singh Tharun - MT25087
+                                          ## Ruchir Jain - MT25080 
 
 ## Repository Structure
 
