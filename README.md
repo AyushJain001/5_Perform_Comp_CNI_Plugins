@@ -18,10 +18,10 @@ The comparison is performed under a controlled microservice workload and focuses
 
 ## 2. Team Information
 
-1. Group Number: 5
-2. Ayush Jain - MT25066
-3. Singh Tharun - MT25087
-4. Ruchir Jain - MT25080 
+                             Group Number: 5
+                                            Ayush Jain - MT25066
+                                            Singh Tharun - MT25087
+                                            Ruchir Jain - MT25080 
 
 ## 3. Repository Structure
 
@@ -30,7 +30,7 @@ Key folders used in final submission:
 1. `G_5_manifests/`: Kubernetes YAML manifests for namespace, server, and client
 2. `G_5_scripts/`: Automation scripts for setup, cluster creation, benchmark runs, and metrics collection
 3. `G_5_results/`: Final CSV outputs (latency and resource metrics for all CNIs)
-4. `G_5_plots/`: Hardcoded matplotlib scripts and generated plot images
+4. `G_5_plots/`:  matplotlib scripts and generated plot images
 5. `G_5_report/`: Final report files
 
 ## 4. Prerequisites
