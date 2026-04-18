@@ -28,3 +28,4 @@ kubectl --context "${CTX}" top pods -A --no-headers | while read -r ns pod cpu m
 done
 
 echo "[DONE] Resource metrics saved: ${OUT_FILE}"
+
