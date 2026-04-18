@@ -125,7 +125,7 @@ Generated figures are written to `G_5_plots/`.
 
 ### Final Report
 
-1. G_5_report.pdf`
+1. G_5_report.pdf
 
 ## Reproducibility Notes
 
