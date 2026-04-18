@@ -1,103 +1,186 @@
 # G_5 Performance Comparison of Kubernetes CNI Plugins
 
-## Project Statement
+## 1. Project Overview
 
-This project compares Flannel, Calico, and Cilium for Kubernetes networking performance under realistic microservice communication.
+This repository contains the complete implementation of Group 5's Kubernetes networking performance study.
 
-## Group
+We compare three widely used CNI plugins:
 
-- Group ID: 5
-- Team Members: UPDATE_THIS
+1. Flannel
+2. Calico
+3. Cilium
 
-## What This Repository Contains
+The comparison is performed under a controlled microservice workload and focuses on:
 
-- End-to-end setup scripts for local tool installation and cluster creation.
-- Kubernetes manifests for benchmark workload deployment.
-- Benchmark automation scripts for latency, throughput, and resource overhead collection.
-- Plot scripts and report template aligned with submission format.
+1. Latency behavior (including p99 tail latency)
+2. Throughput consistency
+3. CPU and memory overhead
 
-## Evaluation Questions
+## 2. Team Information
 
-1. Which CNI gives the lowest latency (p50, p90, p99) at increasing QPS?
-2. Which CNI gives the best sustained throughput under fixed error budget?
-3. Which CNI incurs the lowest CPU and memory overhead during load?
-4. How do architecture differences explain observed behavior?
+1. Group Number: 5
+2. Ayush Jain - MT25066
+3. Singh Tharun - MT25087
+4. Ruchir Jain - MT25080
 
-## High-Level Workflow
+## 3. Repository Structure
 
-1. Install tools locally.
-2. Create one cluster per CNI (same node resources).
-3. Deploy same workload and benchmark client.
-4. Run identical load profiles.
-5. Collect latency and resource metrics.
-6. Convert measured CSV metrics into hardcoded values.
-7. Generate plots.
-8. Fill report and presentation.
+Key folders used in final submission:
 
-## Quick Start
+1. `G_5_manifests/`: Kubernetes YAML manifests for namespace, server, and client
+2. `G_5_scripts/`: Automation scripts for setup, cluster creation, benchmark runs, and metrics collection
+3. `G_5_results/`: Final CSV outputs (latency and resource metrics for all CNIs)
+4. `G_5_plots/`: Hardcoded matplotlib scripts and generated plot images
+5. `G_5_report/`: Final report files
+
+## 4. Prerequisites
+
+Run on Linux with the following available:
+
+1. Docker
+2. Bash
+3. Python 3
+4. Internet access (for pulling images/tools)
+
+The setup script handles most tool bootstrapping used by this project.
+
+## 5. Setup Commands
+
+From repository root:
 
 ```bash
-cd /home/iiitd/grs
 chmod +x G_5_scripts/*.sh
 ./G_5_scripts/G_5_setup_prereqs.sh
+```
+
+What this does:
+
+1. Prepares required tooling environment
+2. Sets up local artifacts used by project scripts
+
+## 6. End-to-End Benchmark Workflow
+
+Run these steps for each CNI: `flannel`, `calico`, `cilium`.
+
+### 6.1 Create Cluster
+
+```bash
 ./G_5_scripts/G_5_create_cluster.sh flannel
 ./G_5_scripts/G_5_create_cluster.sh calico
 ./G_5_scripts/G_5_create_cluster.sh cilium
+```
+
+### 6.2 Deploy Workload
+
+```bash
+./G_5_scripts/G_5_deploy_workload.sh flannel
+./G_5_scripts/G_5_deploy_workload.sh calico
+./G_5_scripts/G_5_deploy_workload.sh cilium
+```
+
+### 6.3 Run Benchmark
+
+```bash
+./G_5_scripts/G_5_run_benchmark.sh flannel
+./G_5_scripts/G_5_run_benchmark.sh calico
+./G_5_scripts/G_5_run_benchmark.sh cilium
+```
+
+### 6.4 Collect Resource Metrics
+
+```bash
+./G_5_scripts/G_5_collect_metrics.sh flannel
+./G_5_scripts/G_5_collect_metrics.sh calico
+./G_5_scripts/G_5_collect_metrics.sh cilium
+```
+
+### 6.5 Cleanup (Optional)
+
+```bash
+./G_5_scripts/G_5_cleanup.sh
+```
+
+## 7. Plot Generation Commands
+
+Use project Python environment if required by your machine setup.
+
+```bash
+./G_5_artifacts/G_5_venv/bin/python G_5_plots/G_5_plot_latency_hardcoded.py
+./G_5_artifacts/G_5_venv/bin/python G_5_plots/G_5_plot_latency_variability_hardcoded.py
+./G_5_artifacts/G_5_venv/bin/python G_5_plots/G_5_plot_overhead_hardcoded.py
+./G_5_artifacts/G_5_venv/bin/python G_5_plots/G_5_plot_throughput_ratio_hardcoded.py
+```
+
+Generated figures are written to `G_5_plots/`.
+
+## 8. Expected Output Files
+
+### 8.1 Final Results (CSV)
+
+1. `G_5_results/G_5_latency_flannel.csv`
+2. `G_5_results/G_5_latency_calico.csv`
+3. `G_5_results/G_5_latency_cilium.csv`
+4. `G_5_results/G_5_resource_flannel.csv`
+5. `G_5_results/G_5_resource_calico.csv`
+6. `G_5_results/G_5_resource_cilium.csv`
+
+### 8.2 Final Report
+
+1. `G_5_report/G_5_report.pdf`
+
+## 9. Reproducibility Notes
+
+For fair CNI comparison:
+
+1. Keep machine and Docker environment constant across runs
+2. Use same cluster topology and same workload settings
+3. Run repeated measurements per load point
+4. Compare results only after all three CNIs complete full run cycle
+
+## 10. Troubleshooting
+
+1. If `kubectl top` fails, ensure metrics-server is available before running resource collection.
+2. If any script is not executable, run:
+
+```bash
+chmod +x G_5_scripts/*.sh
+```
+
+3. If Python plot command fails due missing package, install from:
+
+```bash
+./G_5_artifacts/G_5_venv/bin/pip install -r G_5_requirements.txt
+```
+
+## 11. Submission Notes
+
+This GitHub repository is maintained as source code + scripts + plots + results + report artifacts.
+
+Per final constraints used in this repository state:
+
+1. `G_5_results/` stores CSV deliverables for all 3 CNIs.
+2. JSON raw artifacts are excluded from tracked result files.
+
+## 12. Quick Run Checklist
+
+Use this short sequence if starting fresh:
+
+```bash
+chmod +x G_5_scripts/*.sh
+./G_5_scripts/G_5_setup_prereqs.sh
+
+./G_5_scripts/G_5_create_cluster.sh flannel
 ./G_5_scripts/G_5_deploy_workload.sh flannel
 ./G_5_scripts/G_5_run_benchmark.sh flannel
 ./G_5_scripts/G_5_collect_metrics.sh flannel
-./G_5_artifacts/G_5_venv/bin/python G_5_scripts/G_5_generate_hardcoded_plot_data.py
-./G_5_artifacts/G_5_venv/bin/python G_5_plots/G_5_plot_latency_hardcoded.py
-./G_5_artifacts/G_5_venv/bin/python G_5_plots/G_5_plot_overhead_hardcoded.py
+
+./G_5_scripts/G_5_create_cluster.sh calico
+./G_5_scripts/G_5_deploy_workload.sh calico
+./G_5_scripts/G_5_run_benchmark.sh calico
+./G_5_scripts/G_5_collect_metrics.sh calico
+
+./G_5_scripts/G_5_create_cluster.sh cilium
+./G_5_scripts/G_5_deploy_workload.sh cilium
+./G_5_scripts/G_5_run_benchmark.sh cilium
+./G_5_scripts/G_5_collect_metrics.sh cilium
 ```
-
-Repeat deployment and benchmark for `calico` and `cilium`.
-
-For final submission, keep the plot scripts hardcoded using your measured values from `G_5_results/*.csv`.
-
-## Submission Naming Conventions (Critical)
-
-- Zip file: `G_5_Part_B_nameOfProject.zip`
-- Every file should follow naming convention with `G_5` prefix.
-- Use only `.zip` extension, no binaries.
-- Plot scripts should be `.py` and use hardcoded values for final submission.
-
-## Recommended Final Folder (inside zip)
-
-- `G_5_README.md`
-- `G_5_report.pdf`
-- `G_5_presentation.pdf`
-- `G_5_scripts/`
-- `G_5_manifests/`
-- `G_5_results/` (CSV, logs)
-- `G_5_plots/` (PNG + py plotting scripts)
-
-## Reproducibility Controls
-
-- Use the same Kubernetes version for all three CNIs.
-- Use same node count and machine size.
-- Use same benchmark duration, connections, and QPS schedule.
-- Run each experiment at least 5 times and average.
-
-## Notes
-
-- If `kubectl top` fails, install metrics-server using script comments in `G_5_collect_metrics.sh`.
-- If CNI install fails due version mismatch, pin tested versions in `G_5_scripts/G_5_create_cluster.sh`.
-
-## Optional Live Demo Dashboard (Streamlit)
-
-This dashboard is optional and intended for demo/viva presentation. It does not replace the submission norms.
-
-```bash
-cd /home/iiitd/grs
-/home/iiitd/grs/G_5_artifacts/G_5_venv/bin/python -m pip install -r G_5_demo/G_5_demo_requirements.txt
-./G_5_demo/G_5_run_dashboard.sh
-```
-
-Then open:
-
-- <http://localhost:8501>
-
-Dashboard file:
-
-- `G_5_demo/G_5_dashboard_streamlit.py`
